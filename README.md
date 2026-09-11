@@ -1,7 +1,7 @@
 Mail ForensiX
 
 <p align="center">
-  <img src="logo.png" alt="Mail ForensiX" width="110">
+  <img src="logo.png" alt="Mail ForensiX" width="120">
 </p>
 
 <h1 align="center">Mail ForensiX</h1>
@@ -11,177 +11,181 @@ Mail ForensiX
 </p>
 
 <p align="center">
-  Analyze raw emails, identify phishing indicators, inspect authentication signals,
-  trace sender IPs, and generate an explainable forensic verdict — all from a single web interface.
+  Analyze raw emails, inspect authentication signals, detect phishing indicators,
+  enrich sender IP intelligence, and generate an explainable forensic verdict.
 </p>
 
 <p align="center">
   <a href="https://github.com/Shriniketan369/mail_forensix">
-    <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="GitHub">
+    <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="GitHub Repository">
   </a>
-  <img src="https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
-  <img src="https://img.shields.io/badge/Frontend-HTML%20%7C%20CSS-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="Frontend">
-  <img src="https://img.shields.io/badge/Analysis-Explainable%20AI-6C63FF?style=for-the-badge" alt="Explainable AI">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/Explainable%20Detection-6C63FF?style=for-the-badge" alt="Explainable Detection">
 </p>
 
 Overview
 
-Mail ForensiX is a lightweight email-security and digital-forensics application designed to help analysts investigate suspicious messages.
+Mail ForensiX is a browser-based email forensics and phishing-analysis tool.
 
-Instead of returning an unexplained "Phishing" label, Mail ForensiX exposes the evidence behind its decision. It combines:
+It takes a raw email, extracts forensic evidence, evaluates multiple phishing indicators, performs content-level analysis, enriches public sender IP information, and produces a human-readable security verdict.
 
-Email header and content parsing
+Unlike a black-box classifier, Mail ForensiX exposes which indicators were triggered and why they affected the result.
 
-Deterministic phishing-detection rules
+Every flag is auditable. No black box.
 
-ML-assisted suspicious-language analysis
+Core Workflow
 
-SPF / DKIM / DMARC signal analysis
+The complete analysis pipeline is:
 
-Sender IP extraction and GeoIP enrichment
+flowchart TD
+    A["Raw Email"] --> B["Email Parser"]
 
-Risk scoring and confidence
+    B --> C["Header Analysis"]
+    B --> D["Body Analysis"]
+    B --> E["Sender IP Extraction"]
 
-Human-readable forensic reasoning
+    C --> F["Detection Rubric"]
+    D --> F
 
-Recommended analyst actions
+    D --> G["ML Text Analysis"]
 
-Analysis history and dashboard statistics
+    E --> H["GeoIP Lookup"]
 
-The core design principle is simple:
+    F --> I["Rule Score"]
+    G --> J["ML Score"]
 
-Every flag should be explainable.
+    I --> K["Score Fusion"]
+    J --> K
 
-Why Mail ForensiX?
+    K --> L["Final Risk Score"]
+    L --> M{"Risk Level"}
 
-Traditional phishing classifiers can make a decision without making the reasoning obvious to the analyst.
+    M -->|0-25| N["Safe"]
+    M -->|26-55| O["Suspicious"]
+    M -->|56-100| P["Malicious"]
 
-Mail ForensiX takes a different approach.
+    N --> Q["Explainable Forensic Report"]
+    O --> Q
+    P --> Q
 
-It exposes the signals contributing to the verdict, allowing an investigator to answer:
+    H --> Q
 
-What made this email suspicious?
+GitHub natively renders Mermaid diagrams in Markdown files, so these diagrams are stored as editable Mermaid source rather than fragile screenshots. citeturn0search4turn0search0
 
-Did authentication checks fail?
+Forensic Analysis Architecture
 
-Does the From address conflict with Reply-To?
+flowchart LR
+    subgraph INPUT["INPUT"]
+        A["Raw Email"]
+    end
 
-Is the sender claiming to represent a known brand from an unrelated domain?
+    subgraph PARSING["PARSING"]
+        B["parser.js"]
+        B1["Headers"]
+        B2["Body"]
+        B3["Authentication"]
+        B4["URLs"]
+        B5["Sender IP"]
+    end
 
-Does the message contain credential-harvesting language?
+    subgraph DETECTION["DETECTION"]
+        C["classifier.js"]
+        C1["SPF"]
+        C2["DKIM"]
+        C3["DMARC"]
+        C4["Reply-To"]
+        C5["URL Signals"]
+        C6["Social Engineering"]
+    end
 
-Are there suspicious URLs?
+    subgraph INTELLIGENCE["INTELLIGENCE"]
+        D["ml.js"]
+        E["geoip.js"]
+    end
 
-What suspicious language was detected?
+    subgraph OUTPUT["OUTPUT"]
+        F["Score Fusion"]
+        G["Verdict"]
+        H["Forensic Report"]
+    end
 
-Where does the public sender IP geolocate?
+    A --> B
+    B --> B1
+    B --> B2
+    B --> B3
+    B --> B4
+    B --> B5
 
-What action should an analyst take next?
+    B1 --> C
+    B2 --> C
+    B3 --> C
+    B4 --> C
+    B5 --> E
 
-This makes the system suitable for security education, phishing triage, SOC demonstrations, hackathons, and forensic analysis prototypes.
+    B2 --> D
 
-Detection Pipeline
+    C1 --> C
+    C2 --> C
+    C3 --> C
+    C4 --> C
+    C5 --> C
+    C6 --> C
 
-┌─────────────────┐
-│    Raw Email    │
-│  Headers + Body │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Email Parser   │
-│ Headers / Body  │
-│ Auth / IP / URL │
-└────────┬────────┘
-         │
-         ├─────────────────────┐
-         ▼                     ▼
-┌─────────────────┐   ┌─────────────────┐
-│ Detection       │   │ ML Text         │
-│ Rubric          │   │ Analysis        │
-│                 │   │                 │
-│ SPF / DKIM      │   │ Suspicious      │
-│ DMARC           │   │ wording /       │
-│ URLs            │   │ tokens          │
-│ Domain mismatch │   │                 │
-│ Social          │   │                 │
-│ engineering     │   │                 │
-└────────┬────────┘   └────────┬────────┘
-         │                     │
-         └──────────┬──────────┘
-                    ▼
-           ┌──────────────────┐
-           │ Score Fusion     │
-           │                  │
-           │ Rubric: 60%      │
-           │ ML:     40%      │
-           └────────┬─────────┘
-                    │
-                    ▼
-       ┌─────────────────────────┐
-       │ Explainable Verdict     │
-       │                         │
-       │ Safe / Suspicious /     │
-       │ Malicious               │
-       └────────────┬────────────┘
-                    │
-                    ▼
-           ┌──────────────────┐
-           │ GeoIP Enrichment │
-           │ Sender IP →      │
-           │ Location / ISP   │
-           └────────┬─────────┘
-                    │
-                    ▼
-          ┌────────────────────┐
-          │ Forensic Report    │
-          │ Evidence + Reason  │
-          │ + Recommendation   │
-          └────────────────────┘
+    C --> F
+    D --> F
+    E --> H
 
-Key Features
+    F --> G
+    G --> H
 
-1. Raw Email Forensics
+Detection Model
 
-Mail ForensiX parses raw email content and extracts useful forensic fields such as:
+Mail ForensiX uses a hybrid, explainable scoring model.
 
-Sender
+flowchart LR
+    A["Rule-Based Evidence"] --> B["60% Weight"]
+    C["ML Text Signal"] --> D["40% Weight"]
 
-Recipient
+    B --> E["Weighted Score Fusion"]
+    D --> E
 
-Reply-To
+    E --> F["Final Score: 0-100"]
 
-Subject
+    F --> G{"Classification"}
 
-Sender IP
+    G -->|0-25| H["SAFE"]
+    G -->|26-55| I["SUSPICIOUS"]
+    G -->|56-100| J["MALICIOUS"]
 
-Authentication results
+Score Fusion
 
-Email body
+When the ML signal is available:
 
-Relevant header information
+Final Score =
+    (Rule Score × 0.60)
+  + (ML Score × 0.40)
 
-This converts an unstructured email into analyzable evidence.
+The rule-based signal receives the higher weight because authentication and structural email indicators provide deterministic forensic evidence, while text analysis is probabilistic.
 
-2. Explainable Detection Rubric
+Detection Rubric
 
-The detection engine uses an explicit, weighted rule set rather than a hidden black-box model.
+The rule engine evaluates multiple independent indicators.
 
-Current signals include:
-
-Signal
+Indicator
 
 Weight
 
-SPF authentication failure
+SPF failure
 
 20
 
-DKIM authentication failure
+DKIM failure
 
 15
 
-DMARC authentication failure
+DMARC failure
 
 15
 
@@ -189,7 +193,7 @@ From / Reply-To mismatch
 
 20
 
-Urgency / pressure language
+Urgency language
 
 15
 
@@ -205,7 +209,7 @@ Suspicious / non-HTTPS link
 
 15
 
-Brand / sender-domain mismatch
+Brand / domain mismatch
 
 15
 
@@ -213,409 +217,422 @@ Generic greeting
 
 5
 
-The rubric score is capped at 100.
+The rule score is capped at 100.
 
-Because each rule has an explicit test and weight, the decision process is inspectable and auditable.
+Because each rule has a visible condition and weight, an analyst can trace the result back to the evidence that produced it.
 
-3. ML-Assisted Text Analysis
+Risk Classification
 
-The project includes a lightweight client-side text-analysis component that provides an additional phishing-probability signal based on message wording.
-
-It can expose:
-
-Phishing probability
-
-Suspicious/high-impact tokens
-
-Number of tokens evaluated
-
-An independent content-level signal
-
-The ML component is deliberately treated as an additional signal rather than the sole source of truth.
-
-4. Hybrid Score Fusion
-
-When the ML signal is available, the final score is calculated as:
-
-Final Score = (Rubric Score × 0.60)
-            + (ML Probability × 0.40)
-
-The rule-based signal receives the larger weight because authentication and structural indicators are deterministic evidence, while language analysis is probabilistic.
-
-If the ML component is unavailable, the application safely falls back to the rule-based score.
-
-5. Risk Classification
-
-Final Score
+Score
 
 Verdict
+
+Interpretation
 
 0–25
 
 🟢 Safe
 
+Few or no significant phishing indicators
+
 26–55
 
 🟡 Suspicious
+
+Multiple indicators require investigation
 
 56–100
 
 🔴 Malicious
 
-The application also produces:
+Strong evidence of phishing or malicious intent
 
-Confidence
+The score is an investigation aid and should not be treated as absolute proof.
 
-Reasoning
+What Mail ForensiX Analyzes
 
-Triggered red flags
+Email Headers
 
-Recommended action
+From
 
-Underlying scores
+To
 
-6. Sender IP Intelligence
+Reply-To
 
-When a usable public sender IP is present, Mail ForensiX can enrich it with GeoIP information.
+Subject
 
-Potential enrichment includes:
+Sender IP
 
-IP address
+Authentication results
 
-City
+Relevant routing/header information
 
-Region
+Authentication Signals
+
+SPF
+
+DKIM
+
+DMARC
+
+Content Signals
+
+Urgency
+
+Threats
+
+Account suspension language
+
+Credential requests
+
+OTP/password requests
+
+Verification language
+
+Generic greetings
+
+Social-engineering indicators
+
+URL Signals
+
+HTTP vs HTTPS
+
+Suspicious URLs
+
+Potentially deceptive domains
+
+URL-based phishing indicators
+
+Sender Intelligence
+
+Public sender IP
 
 Country
 
-Country code
+Region
+
+City
 
 ISP / organization
 
-Latitude
-
-Longitude
+Coordinates
 
 Timezone
 
-Private/internal addresses are handled separately because they are not meaningful public geolocation targets.
+Explainability
 
-7. Forensic Report Generation
+A major design goal of Mail ForensiX is to avoid producing an unexplained label.
 
-The final analysis consolidates the available evidence into a readable report containing:
+Instead of:
 
-Verdict
-Confidence
-Reasoning
-Red Flags
-Authentication Results
-Sender Information
-Sender IP
-GeoIP Information
-Recommended Action
+Verdict: MALICIOUS
 
-This makes the result suitable for a quick SOC-style triage workflow or a cybersecurity demonstration.
+the system can provide an evidence trail such as:
 
-8. Analysis History & Dashboard
+Verdict: MALICIOUS
 
-The frontend provides an analysis-oriented dashboard with support for:
+Triggered indicators:
+✓ SPF authentication failure
+✓ DMARC authentication failure
+✓ From / Reply-To mismatch
+✓ Urgency language detected
+✓ Sensitive-information request
+✓ Suspicious URL detected
 
-Previous analysis results
+Rule Score: 85
+ML Score: 78
+Final Score: 82.2
 
-Classification statistics
+Recommended Action:
+Treat the message as high risk and investigate before interacting
+with links, attachments, or requested credentials.
 
-Quick access to sample emails
+This makes the output useful for analysts, demonstrations, and cybersecurity education.
 
-Report copying
+Sender IP Intelligence
 
-Repeated investigation workflows
+When a public sender IP can be extracted, Mail ForensiX can enrich the investigation with GeoIP data.
 
-Architecture
+flowchart LR
+    A["Raw Email"] --> B["Extract Sender IP"]
+    B --> C{"Public IP?"}
 
-Mail ForensiX is intentionally lightweight and currently runs as a client-side web application.
+    C -->|No| D["Mark as Private / Unavailable"]
+    C -->|Yes| E["GeoIP Lookup"]
 
-                 ┌───────────────────────────┐
-                 │         index.html        │
-                 │       Application UI      │
-                 └─────────────┬─────────────┘
-                               │
-                 ┌─────────────▼─────────────┐
-                 │          app.js           │
-                 │ UI + Workflow + Reports   │
-                 └───────┬─────────┬─────────┘
-                         │         │
-            ┌────────────▼───┐   ┌─▼──────────────┐
-            │   parser.js    │   │ classifier.js  │
-            │ Email parsing  │   │ Rule engine    │
-            └────────────────┘   └───────┬────────┘
-                                         │
-                               ┌─────────▼─────────┐
-                               │      ml.js        │
-                               │ Text intelligence │
-                               └───────────────────┘
+    E --> F["Country"]
+    E --> G["Region"]
+    E --> H["City"]
+    E --> I["ISP / Organization"]
+    E --> J["Latitude / Longitude"]
+    E --> K["Timezone"]
 
-                 ┌───────────────────────────┐
-                 │         geoip.js         │
-                 │ Sender IP enrichment     │
-                 └─────────────┬─────────────┘
-                               │
-                               ▼
-                         GeoIP service
+    D --> L["Forensic Report"]
+    F --> L
+    G --> L
+    H --> L
+    I --> L
+    J --> L
+    K --> L
+
+Note: IP geolocation is approximate. VPNs, proxies, cloud services, NAT, mail relays, and corporate gateways can make the geolocated address different from the actual sender.
 
 Project Structure
 
 mail_forensix/
 │
-├── index.html       # Main application interface
-├── styles.css       # UI styling and responsive layout
-├── app.js           # Application workflow, dashboard and reports
-├── parser.js        # Raw email parsing and field extraction
-├── classifier.js    # Explainable phishing rubric and score fusion
-├── ml.js            # Client-side ML/text analysis
-├── geoip.js         # Sender IP extraction and GeoIP enrichment
-├── logo.png         # Application logo
-└── README.md        # Project documentation
+├── index.html
+│   └── Main application interface
+│
+├── styles.css
+│   └── Application styling and responsive layout
+│
+├── app.js
+│   └── UI workflow, dashboard, history and report generation
+│
+├── parser.js
+│   └── Raw email/header parsing
+│
+├── classifier.js
+│   └── Detection rubric, scoring and verdict generation
+│
+├── ml.js
+│   └── ML-assisted email text analysis
+│
+├── geoip.js
+│   └── Sender IP extraction and GeoIP enrichment
+│
+├── logo.png
+│   └── Application logo
+│
+└── README.md
+    └── Project documentation
 
-How the Detection Engine Works
+Component Responsibilities
 
-Step 1 — Parse
+flowchart TB
+    A["app.js<br/>Application Controller"]
 
-The raw email is converted into structured information.
+    A --> B["parser.js<br/>Email Parsing"]
+    A --> C["classifier.js<br/>Detection + Scoring"]
+    A --> D["ml.js<br/>Text Analysis"]
+    A --> E["geoip.js<br/>IP Intelligence"]
 
-Step 2 — Evaluate Rules
+    B --> F["Structured Email Data"]
+    C --> G["Rule Score + Red Flags"]
+    D --> H["ML Probability / Signals"]
+    E --> I["GeoIP Intelligence"]
 
-Each forensic rule independently checks for a suspicious condition.
+    F --> J["Combined Analysis"]
+    G --> J
+    H --> J
+    I --> J
 
-For example:
+    J --> K["Verdict + Confidence"]
+    K --> L["Forensic Report"]
 
-{
-  id: "spf_fail",
-  weight: 20,
-  test: (p) => p.spf === "fail"
-}
+Example Investigation
 
-A triggered rule contributes its configured weight to the rubric score.
+A message such as:
 
-Step 3 — Analyze Content
+Subject: URGENT: Your Account Will Be Suspended
 
-The email body is passed through the ML/text-analysis layer to identify suspicious wording patterns.
+Your account requires immediate verification.
 
-Step 4 — Fuse Signals
+Failure to verify your password and OTP within 24 hours
+will result in permanent suspension.
 
-The rule-based and ML signals are combined:
+Verify now:
+http://example-login-support.com/verify
 
-60% deterministic forensic evidence
-40% content-level ML signal
+may trigger several independent signals:
 
-Step 5 — Generate Verdict
+flowchart TD
+    A["Suspicious Email"] --> B["Urgency"]
+    A --> C["Threat / Suspension"]
+    A --> D["Credential Request"]
+    A --> E["OTP Request"]
+    A --> F["Suspicious URL"]
 
-The final score determines the risk category.
+    B --> G["Detection Rubric"]
+    C --> G
+    D --> G
+    E --> G
+    F --> G
 
-Step 6 — Explain
+    G --> H["Elevated Risk Score"]
+    H --> I["Explainable Verdict"]
 
-The application maps triggered rules to human-readable explanations and generates an analyst recommendation.
-
-Example
-
-Consider a message containing:
-
-From: security@example-support.com
-Reply-To: recovery@example-support.com
-
-Subject: Urgent Account Verification Required
-
-Your account will be suspended within 24 hours.
-Verify your password and OTP immediately:
-
-http://example-support-login.com/verify
-
-Potential signals include:
-
-✓ Urgency language
-✓ Threat / account-suspension language
-✓ Sensitive-information request
-✓ Non-HTTPS URL
-✓ Suspicious verification URL
-✓ Possible sender-domain mismatch
-
-Mail ForensiX combines these signals with available authentication results and ML content analysis to produce the final verdict.
+The important point is that the system does not rely on one keyword. It combines multiple independent indicators.
 
 Getting Started
 
 Requirements
 
-No package manager or backend is required for the current version.
+Modern web browser
 
-You need:
+Internet connection for GeoIP enrichment
 
-A modern web browser
+No backend or package manager required for the current version
 
-Internet access for GeoIP enrichment
-
-Clone the Repository
+Clone
 
 git clone https://github.com/Shriniketan369/mail_forensix.git
 cd mail_forensix
 
-Run Locally
+Run
 
-The simplest option is to open:
+Open index.html directly in a browser.
 
-index.html
-
-directly in a browser.
-
-For local development, a static HTTP server is recommended.
-
-Python
+For local development, use a static server:
 
 python -m http.server 8000
 
-Open:
+Then open:
 
 http://localhost:8000
 
 Usage
 
-Launch the application.
+Launch Mail ForensiX.
 
 Paste a raw email into the analysis interface.
 
 Start the analysis.
 
-Review the parsed email information.
+Review the parsed headers and body.
 
-Inspect authentication and phishing indicators.
+Inspect SPF, DKIM and DMARC results.
 
-Review the ML/text-analysis signal.
+Review triggered phishing indicators.
 
-Inspect sender IP and GeoIP enrichment where available.
+Inspect the ML text signal.
 
-Review the final verdict and confidence.
+Review sender IP intelligence when available.
 
-Read the generated reasoning and red flags.
+Inspect the final score and verdict.
 
-Follow the recommended action or copy the forensic report.
+Read the explanation and recommended action.
 
-The application also includes sample emails for demonstration and testing.
+Copy the generated forensic report if required.
+
+Built-in sample emails can also be used for demonstrations.
 
 Technology Stack
 
+Layer
+
 Technology
 
-Purpose
+Interface
 
 HTML5
 
-Application structure
+Styling
 
 CSS3
 
-Interface and responsive styling
+Application
 
 Vanilla JavaScript
 
-Application logic
+Email Parsing
 
-JavaScript Regex / Rules
+Custom JavaScript
 
-Email and phishing detection
+Detection
 
-Client-side ML/Text Analysis
+Weighted rule engine
 
-Suspicious-language scoring
+Text Analysis
+
+Client-side ML/text analysis
+
+IP Intelligence
 
 GeoIP API
 
-Sender IP enrichment
+Visualization
 
-Browser APIs
+GitHub Mermaid
 
-Local client-side workflow
+Deployment
 
-No heavy backend framework is required for the current architecture.
+Static web hosting
 
 Security & Privacy
 
-Mail ForensiX is designed as a defensive analysis tool.
+Mail ForensiX is intended for defensive cybersecurity analysis.
 
 Important considerations
 
-Email analysis is primarily performed client-side.
+Email analysis is primarily performed in the browser.
 
-GeoIP enrichment requires a network request for the sender IP.
+Sender IP information may be sent to the configured GeoIP provider.
 
-Do not submit confidential or regulated email content to an untrusted public deployment.
+Do not submit confidential emails to an untrusted public deployment.
 
-GeoIP information is approximate and should not be interpreted as proof of a person's physical location.
+GeoIP information is approximate.
 
-VPNs, proxies, cloud infrastructure, NAT, mail gateways, and relays can make IP geolocation differ from the actual sender's location.
+Detection results should be treated as decision-support evidence.
 
-A single detection signal should never be treated as conclusive evidence.
-
-For production environments, consider adding a dedicated backend, access control, audit logging, privacy controls, and enterprise-grade threat-intelligence providers.
+High-impact investigations should be validated with additional forensic and threat-intelligence sources.
 
 Limitations
 
-Mail ForensiX is a forensic analysis prototype, not a replacement for a production email security gateway.
+Mail ForensiX is a forensic-analysis prototype and is not intended to replace a production Secure Email Gateway or enterprise SOC platform.
 
 Potential limitations include:
 
-Header information can be incomplete or manipulated.
+Incomplete or manipulated email headers
 
-SPF/DKIM/DMARC results may not always provide a complete picture.
+Missing authentication information
 
-Legitimate third-party mail services can create unusual authentication or routing patterns.
+Legitimate third-party mail infrastructure
 
-Language-based detection can produce false positives.
+False positives from suspicious wording
 
-Novel phishing campaigns may evade static rules.
+False negatives against novel phishing campaigns
 
-IP geolocation is inherently approximate.
+Approximate IP geolocation
 
-Brand/domain matching currently relies on a finite set of known brands.
+Finite brand/domain intelligence
 
-The client-side architecture is not intended for large-scale enterprise mail processing.
-
-Use the generated verdict as decision support, not as absolute proof.
+Client-side processing limitations
 
 Roadmap
 
-Potential future enhancements include:
+.eml file upload
 
-.eml file upload and automated parsing
-
-Attachment metadata and malware analysis
+Attachment analysis
 
 URL reputation checks
 
 Domain reputation and age analysis
 
-DNS / MX / SPF record inspection
+DNS / MX analysis
 
 Expanded brand impersonation detection
 
 Threat-intelligence integrations
 
-VirusTotal / URLScan enrichment
-
 IOC extraction
 
 PDF / JSON report export
 
-Case management
+Investigation case management
 
-Persistent investigation history
+Persistent analysis history
 
-Email campaign clustering
+Campaign clustering
 
 Authentication-chain visualization
 
 Advanced NLP / transformer-based classification
 
-SIEM / SOC integrations
+SIEM integration
 
-API-based enterprise deployment
+Enterprise API
 
 Responsible Use
 
@@ -623,13 +640,13 @@ Mail ForensiX is intended for:
 
 Defensive cybersecurity
 
-Email security analysis
+Phishing analysis
 
-Phishing investigation
-
-Digital forensics education
+Email forensics
 
 SOC training
+
+Cybersecurity education
 
 Security research
 
@@ -637,46 +654,41 @@ Authorized incident response
 
 Cybersecurity competitions and demonstrations
 
-Only analyze emails and network information that you are authorized to investigate.
+Only analyze email and network information that you are authorized to investigate.
 
 Contributing
 
 Contributions are welcome.
 
-Development workflow
-
 git clone https://github.com/Shriniketan369/mail_forensix.git
 cd mail_forensix
-
 git checkout -b feature/your-feature
 
-Make your changes, test them locally, and submit a pull request.
+When submitting a pull request, please include:
 
-When contributing, please include:
+What changed
 
-A clear description of the change
+Why it changed
 
-The motivation behind it
+How it was tested
 
-Testing performed
-
-Any security or privacy considerations
+Any security/privacy implications
 
 License
 
 No open-source license is currently specified in the repository.
 
-If this project is intended for public distribution or external contributions, adding a license such as MIT, Apache-2.0, or GPL-3.0 is recommended.
+If the project is intended for public distribution or external contributions, consider adding an appropriate license such as MIT, Apache-2.0, or GPL-3.0.
 
-Project
+Repository
 
-Repository:
+GitHub:
 https://github.com/Shriniketan369/mail_forensix
 
 Author:
 Shriniketan369
 
-Core Principle
+The Principle
 
 <p align="center">
   <strong>Every flag is auditable. No black box.</strong>
@@ -684,8 +696,4 @@ Core Principle
 
 <p align="center">
   Mail ForensiX turns raw email evidence into an explainable security verdict.
-</p>
-
-<p align="center">
-  Built for cybersecurity analysis, education, and defensive security.
 </p>
