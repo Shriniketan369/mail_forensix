@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mail ForensiX</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ============ LEFT RAIL ============ -->
+  <nav class="rail">
+    <div class="rail-brand">
+      <div class="rail-mark">
+        <img src="logo.png" alt="Mail ForensiX logo">
+      </div>
+      <div class="rail-brand-text">
+        <span class="rail-brand-name">Mail ForensiX</span>
+        <span class="rail-brand-tag">Email Security &amp; Forensics</span>
+      </div>
+    </div>
+
+    <div class="rail-nav">
+      <button class="rail-item active" data-view="analyze">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M11 4a7 7 0 105.196 11.696l3.554 3.554a1 1 0 001.414-1.414l-3.554-3.554A7 7 0 0011 4z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Analyze</span>
+      </button>
+      <button class="rail-item" data-view="history">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M4.5 10A8 8 0 1112 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>History</span>
+        <span class="rail-badge" id="historyCount" hidden>0</span>
+      </button>
+      <button class="rail-item" data-view="stats">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10M12 20V4M19 20v-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Stats</span>
+      </button>
+    </div>
+
+    <div class="rail-footer">
+      <div class="rail-status"><span class="rail-status-dot"></span>Engine operational</div>
+      <div class="rail-footer-line dim">Rule engine + ML classifier · runs offline</div>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- ---------- ANALYZE VIEW ---------- -->
+    <section class="view active" id="view-analyze">
+
+      <header class="topbar">
+        <div class="topbar-titles">
+          <h1 id="analyzeTitle">Analyze an email</h1>
+          <p id="analyzeSubtitle">Paste the full raw source — headers and body — and the engine checks authentication, structure, language, and sender origin in one pass.</p>
+        </div>
+        <div class="topbar-status">
+          <span class="status-pill"><span class="status-dot"></span>Analysis engine operational</span>
+        </div>
+      </header>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-label">Raw email source</span>
+          <div class="sample-buttons">
+            <button id="sampleLegit" class="chip-btn">Load legitimate sample</button>
+            <button id="samplePhishing" class="chip-btn">Load phishing sample</button>
+          </div>
+        </div>
+        <textarea id="emailInput" spellcheck="false" placeholder="Paste headers (From, Received, Authentication-Results...) and body here..."></textarea>
+        <div class="panel-foot">
+          <div class="status-line" id="statusLine"></div>
+          <button id="analyzeBtn" class="btn-primary">Analyze email</button>
+        </div>
+      </div>
+
+      <!-- Analysis pipeline stepper -->
+      <div class="panel pipeline-panel" id="pipelinePanel" hidden>
+        <div class="panel-head">
+          <span class="panel-head-label">Analysis pipeline</span>
+          <span class="pipeline-status" id="pipelineStatus">Running…</span>
+        </div>
+        <div class="pipeline-steps" id="pipelineSteps"></div>
+      </div>
+
+      <div class="report" id="report">
+
+        <div class="report-topbar">
+          <div class="report-id-block">
+            <span class="report-id" id="reportId">—</span>
+            <span class="report-meta" id="reportMeta">—</span>
+          </div>
+          <div class="report-actions">
+            <button id="copyReport" class="btn-secondary">
+              <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2" stroke="currentColor" stroke-width="1.6"/></svg>
+              Copy report
+            </button>
+            <button id="newAnalysisBtn" class="btn-dark">New analysis</button>
+          </div>
+        </div>
+
+        <div class="verdict-grid">
+
+          <div class="verdict-card" id="verdictCard">
+            <div class="verdict-top">
+              <div class="verdict-ring-wrap">
+                <svg class="verdict-ring" id="verdictRing" viewBox="0 0 100 100">
+                  <circle class="ring-track" cx="50" cy="50" r="44"></circle>
+                  <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="44"></circle>
+                </svg>
+                <div class="verdict-ring-center">
+                  <span class="ring-score" id="ringScore">—</span>
+                  <span class="ring-score-label">/100</span>
+                </div>
+              </div>
+              <div class="verdict-copy">
+                <div class="verdict-badge-row">
+                  <span class="verdict-badge" id="verdictBadge">
+                    <span class="verdict-icon" id="verdictIcon"></span>
+                    <span id="verdictBadgeLabel">—</span>
+                  </span>
+                </div>
+                <div class="verdict-label" id="verdictLabel">—</div>
+                <div class="verdict-sub" id="reasoning"></div>
+              </div>
+            </div>
+
+            <div class="recommended-action" id="recommendedAction"></div>
+
+            <div class="confidence-block">
+              <div class="confidence-block-top">
+                <span>Confidence</span>
+                <span class="confidence-value" id="confidence">—</span>
+              </div>
+              <div class="confidence-track"><div class="confidence-fill" id="confidenceFill"></div></div>
+              <p class="confidence-note">Based on authentication, headers, URL analysis, language, and sender origin.</p>
+            </div>
+          </div>
+
+          <aside class="side-cards">
+            <div class="quick-summary-card">
+              <h3>Quick summary</h3>
+              <dl class="kv-grid quick-summary-grid">
+                <dt>From</dt><dd id="qsFrom">—</dd>
+                <dt>To</dt><dd id="qsTo">—</dd>
+                <dt>Subject</dt><dd id="qsSubject">—</dd>
+                <dt>Date</dt><dd id="qsDate">—</dd>
+              </dl>
+            </div>
+
+            <div class="risk-guide-card">
+              <h3>Risk level guide</h3>
+              <ul class="risk-guide-list">
+                <li><span class="risk-dot Safe"></span>0 – 25 <span class="risk-guide-name">Safe</span></li>
+                <li><span class="risk-dot Suspicious"></span>26 – 55 <span class="risk-guide-name">Suspicious</span></li>
+                <li><span class="risk-dot Malicious"></span>56 – 100 <span class="risk-guide-name">Malicious</span></li>
+              </ul>
+            </div>
+          </aside>
+
+        </div>
+
+        <div class="route-geo-grid">
+          <div class="evidence-panel route-panel">
+            <h3>Message route</h3>
+            <div class="message-route" id="messageRoute"></div>
+          </div>
+          <div class="evidence-panel geo-mini-panel">
+            <h3>Sender geolocation</h3>
+            <div id="geoMiniBox" class="geo-mini-box"></div>
+          </div>
+        </div>
+
+        <div class="tabs-panel">
+          <div class="tabs-nav" id="tabsNav" role="tablist">
+            <button class="tab-btn active" data-tab="overview" role="tab">Overview</button>
+            <button class="tab-btn" data-tab="auth" role="tab">Authentication</button>
+            <button class="tab-btn" data-tab="headers" role="tab">Headers</button>
+            <button class="tab-btn" data-tab="urls" role="tab">URLs</button>
+            <button class="tab-btn" data-tab="geo" role="tab">Geolocation</button>
+          </div>
+
+          <!-- OVERVIEW TAB -->
+          <div class="tab-pane active" id="tab-overview">
+            <div class="overview-main-grid">
+
+              <div class="overview-left">
+                <div class="evidence-panel">
+                  <h3>Risk score breakdown</h3>
+                  <div class="signal-breakdown" id="signalBreakdown"></div>
+                </div>
+
+                <div class="evidence-panel">
+                  <div class="panel-inline-head">
+                    <h3>Why was this email flagged?</h3>
+                  </div>
+                  <div class="red-flags" id="redFlags"></div>
+                </div>
+              </div>
+
+              <aside class="overview-right">
+                <div class="evidence-panel">
+                  <h3>Key indicators</h3>
+                  <div class="key-indicators" id="keyIndicators"></div>
+                </div>
+
+                <details class="evidence-panel raw-headers-panel">
+                  <summary>Full headers (raw)</summary>
+                  <pre class="raw-headers" id="rawHeaders"></pre>
+                </details>
+
+                <div class="evidence-panel action-cta-panel">
+                  <h3>Want to take action?</h3>
+                  <p>Copy a detailed report to share with your team or attach to a case for further investigation.</p>
+                  <button id="copyReport2" class="btn-dark full-width">
+                    <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 18v1a2 2 0 002 2h12a2 2 0 002-2v-1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Copy report
+                  </button>
+                </div>
+              </aside>
+
+            </div>
+          </div>
+
+          <!-- AUTHENTICATION TAB -->
+          <div class="tab-pane" id="tab-auth">
+            <div class="evidence-panel">
+              <h3>Authentication results</h3>
+              <div class="auth-cards" id="authCards"></div>
+            </div>
+          </div>
+
+          <!-- HEADERS TAB -->
+          <div class="tab-pane" id="tab-headers">
+            <div class="evidence-panel">
+              <h3>Header forensics</h3>
+              <dl class="inspector">
+                <div class="inspector-row"><dt>From</dt><dd id="fFrom">—</dd></div>
+                <div class="inspector-row"><dt>Reply-To</dt><dd id="fReplyTo">—</dd></div>
+                <div class="inspector-row"><dt>Subject</dt><dd id="fSubject">—</dd></div>
+                <div class="inspector-row"><dt>From / Reply-To mismatch</dt><dd id="fMismatch">—</dd></div>
+              </dl>
+            </div>
+            <div class="evidence-panel">
+              <h3>Received chain (raw)</h3>
+              <div id="receivedChain" class="received-chain"></div>
+            </div>
+          </div>
+
+          <!-- URLS TAB -->
+          <div class="tab-pane" id="tab-urls">
+            <div class="evidence-panel">
+              <h3>URLs found in body</h3>
+              <div id="urlList" class="url-list"></div>
+            </div>
+          </div>
+
+          <!-- GEO TAB -->
+          <div class="tab-pane" id="tab-geo">
+            <div class="evidence-panel">
+              <h3>Sender geolocation</h3>
+              <div id="geoBox"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">
+          <img src="logo.png" alt="">
+        </div>
+        <p>No analysis yet. Paste an email above or load a sample to see the forensic report.</p>
+      </div>
+
+    </section>
+
+    <!-- ---------- HISTORY VIEW ---------- -->
+    <section class="view" id="view-history">
+      <header class="topbar">
+        <div class="topbar-titles">
+          <h1>History</h1>
+          <p>Every email analyzed this session, most recent first.</p>
+        </div>
+      </header>
+
+      <div class="history-list" id="historyList"></div>
+
+      <div class="empty-state" id="historyEmpty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M4.5 10A8 8 0 1112 20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <p>Nothing analyzed yet this session. Results will appear here as you go.</p>
+      </div>
+    </section>
+
+    <!-- ---------- STATS VIEW ---------- -->
+    <section class="view" id="view-stats">
+      <header class="topbar">
+        <div class="topbar-titles">
+          <h1>Session stats</h1>
+          <p>A running summary of everything analyzed so far.</p>
+        </div>
+      </header>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">Emails analyzed</div>
+        </div>
+        <div class="stat-card safe">
+          <div class="stat-value" id="statSafe">0</div>
+          <div class="stat-label">Safe</div>
+        </div>
+        <div class="stat-card suspicious">
+          <div class="stat-value" id="statSuspicious">0</div>
+          <div class="stat-label">Suspicious</div>
+        </div>
+        <div class="stat-card malicious">
+          <div class="stat-value" id="statMalicious">0</div>
+          <div class="stat-label">Malicious</div>
+        </div>
+      </div>
+
+      <div class="panel stats-panel">
+        <div class="panel-head"><span class="panel-head-label">Verdict distribution</span></div>
+        <div class="bar-chart" id="verdictChart"></div>
+      </div>
+
+      <div class="empty-state" id="statsEmpty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10M12 20V4M19 20v-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <p>Analyze at least one email to see session statistics.</p>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<script src="parser.js"></script>
+<script src="ml.js"></script>
+<script src="classifier.js"></script>
+<script src="geoip.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
