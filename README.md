@@ -1,72 +1,105 @@
-Mail ForensiX
+<h1 align="center">Mail ForensiX</h1>
 
-Mail ForensiX is a client-side email forensics tool that analyzes raw email source (headers + body) to detect phishing and other malicious mail. It combines a transparent, rule-based scoring engine with a lightweight offline machine learning classifier, and presents the results as a detailed forensic report — authentication status, header analysis, URL inspection, sender geolocation, and an overall risk verdict.
+<p align="center">
+  Paste a raw email. Get a forensic report and a clear verdict.<br>
+  Everything runs in your browser.
+</p>
 
-Everything runs entirely in the browser. There is no backend, no API key, and no email content ever leaves the user's machine (aside from an optional IP geolocation lookup — see Privacy & Network Usage).
+<p align="center">
+  <a href="https://shriniketan369.github.io/mail_forensix/">Live demo</a> &nbsp;|&nbsp;
+  <a href="#getting-started">Getting started</a> &nbsp;|&nbsp;
+  <a href="#how-it-works">How it works</a> &nbsp;|&nbsp;
+  <a href="#limitations">Limitations</a>
+</p>
 
-Features
-Raw email parsing — extracts headers, body, sender IP, and the full Received: chain from pasted raw email source.
-Authentication checks — parses SPF, DKIM, and DMARC results from the Authentication-Results header.
-Rule-based risk scoring — an auditable, weighted rubric checks for:
-Failed SPF / DKIM / DMARC
-From / Reply-To domain mismatches
-Urgency and pressure language ("act now", "within 24 hours", etc.)
-Threatening language (account suspension, legal action, etc.)
-Requests for sensitive information (passwords, OTPs, card/PIN numbers, etc.)
-Suspicious or non-HTTPS links, URL shorteners, and raw-IP links
-Sender domain / claimed brand mismatches (e.g. an email claiming to be from a bank sent from an unrelated domain)
-Generic, non-personalized greetings
-ML text classifier — a Multinomial Naive Bayes model, trained offline on a labeled phishing/legitimate email corpus, scores the body text independently based on learned wording patterns. Its output is fused with the rule-based score to produce the final verdict.
-Sender geolocation — resolves the originating IP address from the Received chain and looks up its approximate location and ISP.
-Verdict & report — classifies each email as Safe, Suspicious, or Malicious, with a confidence score, a plain-language explanation, a recommended action, and a full breakdown of every signal that contributed to the score.
-Session history & stats — tracks every email analyzed during the session and summarizes verdict distribution.
-Sample emails — built-in legitimate and phishing sample messages for quickly trying out the tool.
-How It Works
-Parsing (parser.js) — splits the raw email into headers and body, extracts the sender IP from the Received header chain, and reads SPF/DKIM/DMARC results.
-Rule-based scoring (classifier.js) — runs the parsed email through a weighted rubric of phishing indicators. Each triggered rule contributes points toward a 0–100 risk score.
-ML scoring (ml.js) — independently scores the body text using a pre-trained Naive Bayes model and surfaces the words that most influenced the score.
-Score fusion — the rule-based score (60%) and ML score (40%) are combined into a final risk score, which maps to a verdict:
-0–25 → Safe
-26–55 → Suspicious
-56–100 → Malicious
-Geolocation (geoip.js) — the extracted sender IP is looked up via a public GeoIP API to show approximate origin and ISP.
-Report rendering (app.js, index.html) — results are displayed as an interactive report with tabs for Overview, Authentication, Headers, URLs, and Geolocation.
-Getting Started
+<!-- Add a screenshot of a report, then remove this line and the closing arrow below:
+<p align="center">
+  <img src="assets/screenshot.png" alt="Mail ForensiX report" width="720">
+</p>
+-->
 
-No build step or dependencies are required.
+## What it does
 
-Clone or download this repository.
-Open index.html in a web browser.
-Paste the full raw source of an email (including headers such as From, Received, and Authentication-Results) into the input box, or click Load legitimate sample / Load phishing sample to try it out.
-Click Analyze email to view the forensic report.
+Mail ForensiX analyzes the raw source of an email (headers and body) to detect phishing and other malicious mail. It combines a transparent, rule-based scoring engine with a small offline machine learning classifier, then shows the result as a detailed report.
 
-Tip: Most email clients let you view the raw/original message source (e.g. Gmail: "Show original"; Outlook: "View message source"). Paste that full text, not just the visible email body.
+There is no backend, no API key, and no email content leaves your machine. The one optional exception is the sender IP lookup, explained in [Privacy](#privacy).
 
-Project Structure
+## Features
+
+- **Raw email parsing:** extracts headers, body, sender IP and the full `Received:` chain
+- **Authentication checks:** reads SPF, DKIM and DMARC results from the `Authentication-Results` header
+- **Rule-based risk score:** an auditable, weighted rubric (see below)
+- **ML text classifier:** a Multinomial Naive Bayes model, trained offline, scores the body text on its own and shows the words that influenced the score
+- **Sender geolocation:** approximate location and ISP of the originating IP
+- **Clear verdict:** Safe, Suspicious or Malicious, with a confidence score, a plain-language explanation, a recommended action and a breakdown of every signal
+- **Session history:** tracks every email analyzed in the session and summarizes the verdicts
+- **Sample emails:** built-in legitimate and phishing examples to try
+
+### What the rules check
+
+| Signal | Examples |
+| --- | --- |
+| Authentication | Failed SPF, DKIM or DMARC |
+| Sender identity | `From` and `Reply-To` domain mismatch; sender domain does not match the claimed brand |
+| Pressure language | "act now", "within 24 hours" |
+| Threats | Account suspension, legal action |
+| Sensitive requests | Passwords, OTPs, card or PIN numbers |
+| Links | Non-HTTPS links, URL shorteners, raw-IP links |
+| Greeting | Generic, non-personalized greetings |
+
+## How it works
+
+1. **Parse** (`parser.js`): splits the email into headers and body, finds the sender IP in the `Received` chain, and reads the SPF, DKIM and DMARC results.
+2. **Rule score** (`classifier.js`): each triggered rule adds points to a 0 to 100 risk score.
+3. **ML score** (`ml.js`): the Naive Bayes model scores the body text separately.
+4. **Fuse:** the final score is 60% rule-based and 40% ML.
+5. **Locate** (`geoip.js`): looks up the sender IP for approximate origin and ISP.
+6. **Report** (`app.js`, `index.html`): shows tabs for Overview, Authentication, Headers, URLs and Geolocation.
+
+| Final score | Verdict |
+| --- | --- |
+| 0 to 25 | Safe |
+| 26 to 55 | Suspicious |
+| 56 to 100 | Malicious |
+
+## Getting started
+
+No build step and no dependencies.
+
+1. Clone or download this repository.
+2. Open `index.html` in a browser, or use the [live demo](https://shriniketan369.github.io/mail_forensix/).
+3. Paste the full raw source of an email, including headers like `From`, `Received` and `Authentication-Results`. Or click **Load legitimate sample** or **Load phishing sample**.
+4. Click **Analyze email**.
+
+> **Tip:** most email clients can show the raw message. In Gmail, use **Show original**. In Outlook, use **View message source**. Paste that full text, not just the visible body.
+
+## Project structure
+
+```
 .
-├── index.html      # App shell and report UI
-├── styles.css      # Styling
-├── parser.js       # Raw email → headers, body, sender IP, auth results
-├── classifier.js   # Rule-based scoring rubric and score fusion
-├── ml.js           # Offline Naive Bayes text classifier
-├── geoip.js        # Sender IP geolocation lookup
-├── app.js          # App logic, UI wiring, sample emails, history/stats
-└── logo.png        # App icon/logo
-Privacy & Network Usage
+├── index.html      App shell and report UI
+├── styles.css      Styling
+├── parser.js       Raw email to headers, body, sender IP, auth results
+├── classifier.js   Rule-based scoring and score fusion
+├── ml.js           Offline Naive Bayes text classifier
+├── geoip.js        Sender IP geolocation lookup
+├── app.js          App logic, UI wiring, samples, history and stats
+└── logo.png        App icon
+```
 
-Mail ForensiX is designed to run fully offline for parsing and classification — no email content is ever transmitted anywhere. The one exception is sender geolocation: the extracted sender IP address is sent to ipapi.co (a free, HTTPS, no-API-key GeoIP service) to resolve an approximate location. Private/internal IP addresses are detected and skipped automatically.
+## Privacy
 
-If you want a fully air-gapped setup, you can disable or remove the geolocation lookup in geoip.js.
+Parsing and classification run fully offline, and no email content is sent anywhere.
 
-Limitations
-This tool provides a heuristic risk assessment, not a definitive verdict. It is intended to assist manual review, not replace it.
-The ML classifier is trained on a small, illustrative dataset and is meant to complement — not replace — the rule-based signals.
-Header parsing assumes reasonably well-formed RFC 5322 email source; heavily malformed or obfuscated headers may not parse correctly.
-Geolocation accuracy depends on the third-party GeoIP provider and is approximate (typically city/region level at best).
+The one exception is geolocation. The extracted sender IP address is sent to [ipapi.co](https://ipapi.co), a free HTTPS service that needs no API key. Private and internal IP addresses are detected and skipped. For a fully air-gapped setup, remove or disable the lookup in `geoip.js`.
 
-Disclaimer
-Mail ForensiX is intended for educational and defensive security use — analyzing emails you have legitimate access to (e.g. your own inbox or a security team's investigation queue). Always verify suspicious emails through official channels before taking action, and report confirmed phishing to your organization's IT/security team.
+## Limitations
 
-mail_forensix-main.zip
+- The result is a heuristic risk assessment, not a definitive verdict. Use it to assist manual review, not replace it.
+- The ML classifier is trained on a small, illustrative dataset. It complements the rule-based signals and does not replace them.
+- Header parsing expects reasonably well-formed RFC 5322 email. Heavily malformed or obfuscated headers may not parse correctly.
+- Geolocation depends on a third-party provider and is approximate, typically city or region level at best.
 
-ZIP
+## Disclaimer
+
+Mail ForensiX is for educational and defensive security use, on emails you have legitimate access to, such as your own inbox or a security team's investigation queue. Verify suspicious emails through official channels before acting, and report confirmed phishing to your organization's IT or security team.
